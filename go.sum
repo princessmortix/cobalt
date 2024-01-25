@@ -1,0 +1,10 @@
+github.com/akamensky/argparse v1.4.0 h1:YGzvsTqCvbEZhL8zZu2AiA5nq805NZh75JNj4ajn1xc=
+github.com/akamensky/argparse v1.4.0/go.mod h1:S5kwC7IuDcEr5VeXtGPRVZ5o/FdhcMlQz4IZQuw64xA=
+github.com/emvi/iso-639-1 v1.1.0 h1:EhZiYVA+ysa/b7+0T2DD9hcX7E/5sh4o1KyDAIPu7VE=
+github.com/emvi/iso-639-1 v1.1.0/go.mod h1:CSA53/Tx0xF9bk2DEA0Mr0wTdIxq7pqoVZgBOfoL5GI=
+github.com/mergestat/timediff v0.0.3 h1:ucCNh4/ZrTPjFZ081PccNbhx9spymCJkFxSzgVuPU+Y=
+github.com/mergestat/timediff v0.0.3/go.mod h1:yvMUaRu2oetc+9IbPLYBJviz6sA7xz8OXMDfhBl7YSI=
+github.com/princessmortix/gobalt v1.0.1 h1:I5RfOb0cqzwscvFYnNUW1PbdKyjsDhSSLb/Lw/CR4Nc=
+github.com/princessmortix/gobalt v1.0.1/go.mod h1:YMW28QoWjxXTY7N67+3H5hIqUDpzsLx4DIJG+I3H9OA=
+github.com/princessmortix/gobalt v1.0.2 h1:dYxDG2KEUbljYT6lCMJ5ZsARoq79vscpMWXU/9t1Qdk=
+github.com/princessmortix/gobalt v1.0.2/go.mod h1:YMW28QoWjxXTY7N67+3H5hIqUDpzsLx4DIJG+I3H9OA=
