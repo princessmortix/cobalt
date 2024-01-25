@@ -182,8 +182,6 @@ func main() {
 	}
 	newSettings.VideoQuality = quality
 
-	fmt.Println(newSettings)
-
 	cobaltRequest, err := gobalt.Run(newSettings)
 	if err != nil {
 		if *outputJson {

@@ -6,7 +6,5 @@ require (
 	github.com/akamensky/argparse v1.4.0
 	github.com/emvi/iso-639-1 v1.1.0
 	github.com/mergestat/timediff v0.0.3
-	github.com/princessmortix/gobalt v1.0.2
+	github.com/princessmortix/gobalt v1.0.4
 )
-
-
