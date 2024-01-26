@@ -1,7 +1,4 @@
-# .github/workflows/release.yaml
-
 on:
-  push:
   release:
     types: [created]
 
@@ -33,3 +30,4 @@ jobs:
         ldflags: -s -w
         pre_command: "go install github.com/tc-hib/go-winres@latest && go-winres make"
         asset_name: "cobalt-${{ matrix.goos }}-${{ matrix.goarch }}"
+        overwrite: true
