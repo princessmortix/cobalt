@@ -33,7 +33,7 @@ usage: cobalt [-h|--help] [-u|--url "<value>"] [-c|--video-codec
               (basic|pretty|nerdy|classic)] [-a|--no-video] [-w|--no-watermark]
               [-t|--full-tiktok-audio] [-v|--no-audio] [-d|--dubbed-audio]
               [-m|--metadata] [-g|--gif] [-j|--json] [-s|--status] [-i|--api
-              "<value>"] [-l|--language "<value>"]
+              "<value>"] [-l|--language "<value>"] [-b|--browser]
 
               save what you love directly from command-line, no bullshit
               involved.
@@ -83,6 +83,8 @@ Arguments:
                            language set following the ISO 639-1 format. Only
                            takes effect if -d was passed as an argument.
                            Default: en
+  -b  --browser            Opens the response link in default browser, if
+                           successful. Default: false
 ```
 
 ## Downloading
