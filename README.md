@@ -12,9 +12,9 @@
 Unofficial [cobalt](https://cobalt.tools) command line client made in go. cobalt-cli uses [gobalt library](https://github.com/princessmortix/gobalt) for communication between your machine <-> cobalt servers.
 
 - [Features](#features)
-- [Usage](#usage)
 - [Download](#downloading)
-  - [Compiling](#compiling)
+- [Usage](#usage)
+- [Compiling](#compiling)
 
 ## Features
 - Get directly link from the service cdn (if possible);
@@ -23,6 +23,15 @@ Unofficial [cobalt](https://cobalt.tools) command line client made in go. cobalt
 - Option to check status of cobalt servers;
 - Use custom cobalt instances (see https://instances.hyper.lol);
 - Get dubbed youtube audio.
+
+## Download
+| **Platform/OS** | **Download link**  |
+|-----------------|--------------------|
+| Windows         | [**x64**](https://github.com/princessmortix/cobalt/releases/latest/download/cobalt-windows-amd64.zip) / [x86](https://github.com/princessmortix/cobalt/releases/latest/download/cobalt-windows-386.zip) / [arm](https://github.com/princessmortix/cobalt/releases/latest/download/cobalt-windows-arm.zip)    |
+| Linux           | [**x64**](https://github.com/princessmortix/cobalt/releases/latest/download/cobalt-linux-amd64.tar.gz) / [x86](https://github.com/princessmortix/cobalt/releases/latest/download/cobalt-linux-386.tar.gz) / [arm64](https://github.com/princessmortix/cobalt/releases/latest/download/cobalt-linux-arm64.tar.gz)    |
+| MacOS           | [Intel](https://github.com/princessmortix/cobalt/releases/latest/download/cobalt-darwin-amd64.tar.gz) / [**M1, M2, M3**](https://github.com/princessmortix/cobalt/releases/latest/download/cobalt-darwin-arm64.tar.gz) |
+
+You can also check the [releases page](https://github.com/princessmortix/cobalt/releases/latest) to download the latest version according to your platform.
 
 ## Usage
 ```
@@ -87,13 +96,7 @@ Arguments:
                            successful. Default: false
 ```
 
-## Downloading
-Planned to be added everywhere possible, but this isn't done yet.
-For now, use [releases to download](https://github.com/princessmortix/cobalt/releases/latest) for your platform.
-
-I've manually compiled for: Windows (amd64), Linux (arm and amd64), MacOS (Apple silicion and Intel).
-
-### Compiling
+## Compiling
 Make sure you have the lastest go compiler. [Download it here](https://go.dev/dl).
 
 Easy as:
