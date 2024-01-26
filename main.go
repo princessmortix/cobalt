@@ -4,6 +4,8 @@ import (
 	"encoding/json"
 	"fmt"
 	"os"
+	"os/exec"
+	"runtime"
 	"strconv"
 	"strings"
 	"time"
@@ -99,6 +101,11 @@ func main() {
 		Required: false,
 		Help:     "Downloads dubbed youtube audio according to the language set following the ISO 639-1 format. Only takes effect if -d was passed as an argument",
 		Default:  gobalt.UserLanguage,
+	})
+	openInBrowser := flagParser.Flag("b", "browser", &argparse.Options{
+		Required: false,
+		Help:     "Opens the response link in default browser, if successful",
+		Default:  false,
 	})
 
 	err := flagParser.Parse(os.Args)
@@ -209,6 +216,15 @@ func main() {
 		fmt.Println(cobaltRequest.URLs)
 		os.Exit(0)
 	}
+
+	if *openInBrowser {
+		for _, urls := range cobaltRequest.URLs {
+			err := openInDefaultBrowser(urls)
+			if err != nil {
+				fmt.Println("Failed to open URL on default browser:", err)
+			}
+		}
+	}
 	fmt.Println(cobaltRequest.URL)
 
 }
@@ -253,4 +269,15 @@ func errorJson(err error, msg string) []byte {
 	}
 	errorInJson, _ := json.Marshal(marshalThis)
 	return errorInJson
+}
+
+func openInDefaultBrowser(url string) error {
+	switch runtime.GOOS {
+	case "windows":
+		return exec.Command("rundll32", "url.dll,FileProtocolHandler", url).Start()
+	case "darwin":
+		return exec.Command("start", url).Start()
+	default:
+		return exec.Command("xdg-open", url).Start()
+	}
 }
