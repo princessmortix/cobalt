@@ -126,7 +126,7 @@ func main() {
 	validateLanguage := iso6391.ValidCode(strings.ToLower(*customLanguage))
 	if !validateLanguage {
 		if *outputJson {
-			fmt.Println(errorJson(fmt.Errorf("invalid language code"), "check if the language code is following ISO 639-1 format."))
+			fmt.Println(errorJson(fmt.Errorf("invalid language code, check if the language code is following ISO 639-1 format")))
 			os.Exit(1)
 		}
 		panic("Invalid language code: " + *customLanguage)
@@ -182,7 +182,7 @@ func main() {
 	quality, err := strconv.Atoi(*optionVideoQuality)
 	if err != nil {
 		if *outputJson {
-			fmt.Println(errorJson(err, fmt.Sprintf("expected int on flag -q, got something else: %s", *optionVideoQuality)))
+			fmt.Println(errorJson(fmt.Errorf("expected int on flag -q, got something else: %s", *optionVideoQuality)))
 			os.Exit(1)
 		}
 		panic(fmt.Errorf("expected int on flag -q, got something else: %s\nError details: %e", *optionVideoQuality, err))
@@ -192,7 +192,7 @@ func main() {
 	cobaltRequest, err := gobalt.Run(newSettings)
 	if err != nil {
 		if *outputJson {
-			fmt.Println(errorJson(err, "failed to download the requested media."))
+			fmt.Println(errorJson(err))
 			os.Exit(1)
 		}
 		panic(err)
@@ -233,7 +233,7 @@ func checkStatus(api string, returnJson bool) {
 	check, err := gobalt.CobaltServerInfo(api)
 	if err != nil {
 		if returnJson {
-			fmt.Println(errorJson(err, "failed to contact cobalt server"))
+			fmt.Println(errorJson(err))
 			os.Exit(0)
 		}
 		fmt.Printf("Failed to contact cobalt server at %s due of the following error %e", api, err)
@@ -262,13 +262,13 @@ func checkStatus(api string, returnJson bool) {
 	os.Exit(0)
 }
 
-func errorJson(err error, msg string) []byte {
+func errorJson(err error) string {
 	marshalThis := map[string]string{"error": "true",
-		"message": fmt.Sprintf("%s\nError details: %e", msg, err),
+		"message": fmt.Sprintf("%s", err),
 		"url":     "",
 	}
 	errorInJson, _ := json.Marshal(marshalThis)
-	return errorInJson
+	return string(errorInJson)
 }
 
 func openInDefaultBrowser(url string) error {
