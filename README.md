@@ -13,6 +13,7 @@ Unofficial [cobalt](https://cobalt.tools) command line client made in go. cobalt
 
 - [Features](#features)
 - [Download](#downloading)
+- [Roadmap](#roadmap)
 - [Usage](#usage)
 - [Compiling](#compiling)
 
@@ -32,6 +33,16 @@ Unofficial [cobalt](https://cobalt.tools) command line client made in go. cobalt
 | MacOS           | [Intel](https://github.com/princessmortix/cobalt/releases/latest/download/cobalt-darwin-amd64.tar.gz) / [**M1, M2, M3**](https://github.com/princessmortix/cobalt/releases/latest/download/cobalt-darwin-arm64.tar.gz) |
 
 You can also check the [releases page](https://github.com/princessmortix/cobalt/releases/latest) to download the latest version according to your platform.
+
+## Roadmap
+Planned features for cobalt-cli:
+
+- [x] Json output;
+- [ ] Option to save file to the current/custom folder, likely `-s` flag;
+  - [ ] Display progress bar to track download progress (when supported by cobalt).
+- [ ] Hability to use custom downloader program (wget, curl, got, etc);
+- [ ] Translations.
+ 
 
 ## Usage
 ```
