@@ -38,6 +38,7 @@ You can also check the [releases page](https://github.com/princessmortix/cobalt/
 Planned features for cobalt-cli:
 
 - [x] Json output;
+  - [ ] Time expiration for the returned url.
 - [ ] Option to save file to the current/custom folder, likely `-s` flag;
   - [ ] Display progress bar to track download progress (when supported by cobalt).
 - [ ] Hability to use custom downloader program (wget, curl, got, etc);
