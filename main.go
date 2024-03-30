@@ -12,8 +12,8 @@ import (
 
 	"github.com/akamensky/argparse"
 	iso6391 "github.com/emvi/iso-639-1"
+	"github.com/lostdusty/gobalt"
 	"github.com/mergestat/timediff"
-	"github.com/princessmortix/gobalt"
 )
 
 func main() {
@@ -52,9 +52,9 @@ func main() {
 		Help:     "Extract audio only",
 		Default:  false,
 	})
-	optionTikTokWatermark := flagParser.Flag("w", "no-watermark", &argparse.Options{
+	optionVimeoDash := flagParser.Flag("h", "vimeo-dash", &argparse.Options{
 		Required: false,
-		Help:     "Remove TikTok watermark from TikTok videos",
+		Help:     "Downloads Vimeo videos using dash instead of progressive",
 		Default:  false,
 	})
 	optionFullTikTokAudio := flagParser.Flag("t", "full-tiktok-audio", &argparse.Options{
@@ -176,7 +176,7 @@ func main() {
 	newSettings.DisableVideoMetadata = *optionDisableMetadata
 	newSettings.DubbedYoutubeAudio = *optionDubAudio
 	newSettings.FullTikTokAudio = *optionFullTikTokAudio
-	newSettings.RemoveTikTokWatermark = *optionTikTokWatermark
+	newSettings.UseVimeoDash = *optionVimeoDash
 	newSettings.Url = *URL
 	newSettings.VideoOnly = *optionVideoOnly
 	quality, err := strconv.Atoi(*optionVideoQuality)
@@ -200,13 +200,13 @@ func main() {
 
 	if *outputJson {
 		if cobaltRequest.Status == "picker" {
-			unmarshalOutput := map[string]interface{}{"error": "false", "message": cobaltRequest.Text, "urls": cobaltRequest.URLs}
+			unmarshalOutput := map[string]interface{}{"error": false, "message": cobaltRequest.Text, "urls": cobaltRequest.URLs}
 			output, _ := json.Marshal(unmarshalOutput)
 			fmt.Println(string(output))
 			os.Exit(0)
 		}
 
-		unmarshalOutput := map[string]interface{}{"error": "false", "message": cobaltRequest.Text, "urls": cobaltRequest.URL}
+		unmarshalOutput := map[string]interface{}{"error": false, "message": cobaltRequest.Text, "urls": cobaltRequest.URL}
 		output, _ := json.Marshal(unmarshalOutput)
 		fmt.Println(string(output))
 		os.Exit(0)
@@ -241,7 +241,7 @@ func checkStatus(api string, returnJson bool) {
 	}
 
 	if returnJson {
-		respJson := map[string]string{"error": "false",
+		respJson := map[string]interface{}{"error": false,
 			"message":   "contact was successful",
 			"branch":    check.Branch,
 			"commit":    check.Commit,
@@ -263,7 +263,7 @@ func checkStatus(api string, returnJson bool) {
 }
 
 func errorJson(err error) string {
-	marshalThis := map[string]string{"error": "true",
+	marshalThis := map[string]interface{}{"error": true,
 		"message": fmt.Sprintf("%s", err),
 		"url":     "",
 	}

@@ -22,3 +22,6 @@
 
 # Go workspace file
 go.work
+
+# Win-get manifests
+manifests/
