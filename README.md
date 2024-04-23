@@ -46,18 +46,22 @@ Planned features for cobalt-cli:
  
 
 ## Usage
+cobalt-cli has two subcommands:
+- download: downloads something using cobalt
+- instances: lists all known cobalt instances
+
+### Download
 ```
-usage: cobalt [-h|--help] [-u|--url "<value>"] [-c|--video-codec
+usage: cobalt download [-h|--help] [-u|--url "<value>"] [-c|--video-codec
               (av1|vp9|h264)] [-q|--video-quality
               (144|240|360|480|720|1080|1440|2160)] [-f|--audio-format
               (opus|ogg|wav|mp3|best)] [-p|--filename-pattern
-              (basic|pretty|nerdy|classic)] [-a|--no-video] [-w|--no-watermark]
+              (basic|pretty|nerdy|classic)] [-a|--no-video] [-V|--vimeo-dash]
               [-t|--full-tiktok-audio] [-v|--no-audio] [-d|--dubbed-audio]
               [-m|--metadata] [-g|--gif] [-j|--json] [-s|--status] [-i|--api
               "<value>"] [-l|--language "<value>"] [-b|--browser]
 
-              save what you love directly from command-line, no bullshit
-              involved.
+              download something using cobalt
 
 Arguments:
 
@@ -81,8 +85,8 @@ Arguments:
                            Audio Author (soundcloud, 1242868615).mp3. Default:
                            pretty
   -a  --no-video           Extract audio only. Default: false
-  -w  --no-watermark       Remove TikTok watermark from TikTok videos. Default:
-                           false
+  -V  --vimeo-dash         Downloads Vimeo videos using dash instead of
+                           progressive. Default: false
   -t  --full-tiktok-audio  Enables download of original sound used in a tiktok
                            video. Default: false
   -v  --no-audio           Downloads only the video, without audio, when
@@ -108,6 +112,49 @@ Arguments:
                            successful. Default: false
 ```
 
+### Instances
+```
+usage: cobalt instances [-h|--help] [-j|--json]
+
+              get the list of cobalt instances
+
+Arguments:
+
+  -h  --help  Print help information
+  -j  --json  Output to stdout as json
+```
+
+## JSON Output
+See the documentation for the json output of cobalt-cli.
+### Download
+All json output from the download subcommands follows this format:
+```json
+{
+  "error": bool,
+  "message": "string",
+  "urls": ["string1", "string2", ...]
+}
+```
+Where:
+| **name** | **type** | **info** | **example** |
+|---|---|---|---|
+| error | bool | true if something went wrong | "error":true |
+| message | string | return error messages, otherwise "ok" | "message":"cobalt error: i couldn't connect to the service api. maybe it's down, or cobalt got blocked" |
+| urls | []string | array of urls returned by the service, query scaped | "urls":["https%3A%2F%2Fus3-co.wuk.sh%2Fapi%2Fstream%3Ft%3D6kS3Xr97CAoqvPlBYX0r8%26e%3D1713849463113%26h%3DNHPfrLZ-BJejEnH2orowNy0zzTlVXSYw77RBhzIf0MU%26s%3DxvmTt9DTNl4wLslkfYfCUv6UDIPOTv9iZutl7ENM_dc%26i%3DuX7INLhsbzzofNxZaw6o7g"] |
+
+### Instances
+Returns almost the original json from [https://instances.hyper.lol/](https://instances.hyper.lol/instances.json), except we add two extra keys: error and message, just like above.
+
+Example JSON:
+```json
+[{"error":false,"message":"success!"},[{"version":"7.12.6","commit":"50a98c8","branch":"current","name":"us3","url":"co.wuk.sh","cors":1,"startTime":"1713626380117","FrontendUrl":"cobalt.tools","ApiOnline":true,"FrontEndOnline":true},{"version":"7.12.6","commit":"50a98c8","branch":"current","name":"us-east","url":"cobalt.canine.tools","cors":1,"startTime":"1713837765475","FrontendUrl":"cobalt.canine.tools","ApiOnline":true,"FrontEndOnline":true},{"version":"7.12.6","commit":"50a98c8","branch":"current","name":"us-mw","url":"coapi.selfstacked.com","cors":1,"startTime":"1713626820678","FrontendUrl":"co.selfstacked.com","ApiOnline":true,"FrontEndOnline":true}]]
+```
+
+Error example:
+```json
+{"error":true,"message":"Get \"https://instances.hyper.lol/instances.json\": dial tcp: lookup instances.hyper.lol: no such host"}
+```
+
 ## Compiling
 Make sure you have the lastest go compiler. [Download it here](https://go.dev/dl).
 
@@ -124,7 +171,7 @@ Then run `go-winres make` on the root of this repository, it will create two .sy
 After that, building with `go build` will automatically embed these files on the Windows executable.
 
 # About & Thanks
-- [cobalt](https://github.com/wukko/cobalt) made by [wukko](https://github.com/wukko), super cool guy;
-- [argparse](https://github.com/akamensky/argparse), for handling args
-- Icon made by [me](https://princessmortix.link);
+- [cobalt](https://github.com/wukko/cobalt) made by [wukko](https://github.com/wukko) && [jj](https://github.com/dumbmoron), super cool people;
+- [argparse](https://github.com/akamensky/argparse), for handling args;
+- Icon made by [me](https://lostdusty.com.br);
 - You, for using my application!

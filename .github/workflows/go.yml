@@ -28,6 +28,6 @@ jobs:
         goarch: ${{ matrix.goarch }}
         binary_name: "cobalt-${{ matrix.goos }}-${{ matrix.goarch }}"
         ldflags: -s -w
-        pre_command: "go install github.com/tc-hib/go-winres@latest && go-winres make"
+        pre_command: "go install github.com/tc-hib/go-winres@latest && go-winres make && go test -v"
         asset_name: "cobalt-${{ matrix.goos }}-${{ matrix.goarch }}"
         overwrite: true
