@@ -11,7 +11,7 @@
       "0409": {
         "identity": {
           "name": "cobalt",
-          "version": "1.0.5"
+          "version": "1.0.6"
         },
         "description": "cobalt cli version for https://cobalt.tools",
         "minimum-os": "vista",
@@ -35,8 +35,8 @@
     "#1": {
       "0000": {
         "fixed": {
-          "file_version": "1.0.0.5",
-          "product_version": "1.0.0.5",
+          "file_version": "1.0.0.6",
+          "product_version": "1.0.0.6",
           "flags": "Release"
         },
         "info": {
@@ -44,7 +44,7 @@
             "Comments": "cobalt cli downloader",
             "CompanyName": "Lost Dusty",
             "FileDescription": "",
-            "FileVersion": "1.0.5",
+            "FileVersion": "1.0.6",
             "InternalName": "",
             "LegalCopyright": "",
             "LegalTrademarks": "",
