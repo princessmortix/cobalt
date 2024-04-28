@@ -170,6 +170,12 @@ Then run `go-winres make` on the root of this repository, it will create two .sy
 
 After that, building with `go build` will automatically embed these files on the Windows executable.
 
+## Other projects
+Check out too:
+- [tobalt, cobalt in typescript](https://github.com/tskau/tobalt)
+- [tcobalt, cobalt cli in rust](https://github.com/khyerdev/tcobalt)
+
+
 # About & Thanks
 - [cobalt](https://github.com/wukko/cobalt) made by [wukko](https://github.com/wukko) && [jj](https://github.com/dumbmoron), super cool people;
 - [argparse](https://github.com/akamensky/argparse), for handling args;
