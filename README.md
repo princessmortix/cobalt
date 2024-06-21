@@ -30,9 +30,11 @@ Unofficial [cobalt](https://cobalt.tools) command line client made in go. cobalt
 |-----------------|--------------------|
 | Windows         | [**x64**](https://github.com/princessmortix/cobalt/releases/latest/download/cobalt-windows-amd64.zip) / [x86](https://github.com/princessmortix/cobalt/releases/latest/download/cobalt-windows-386.zip) / [arm](https://github.com/princessmortix/cobalt/releases/latest/download/cobalt-windows-arm.zip)    |
 | Linux           | [**x64**](https://github.com/princessmortix/cobalt/releases/latest/download/cobalt-linux-amd64.tar.gz) / [x86](https://github.com/princessmortix/cobalt/releases/latest/download/cobalt-linux-386.tar.gz) / [arm64](https://github.com/princessmortix/cobalt/releases/latest/download/cobalt-linux-arm64.tar.gz)    |
-| MacOS           | [Intel](https://github.com/princessmortix/cobalt/releases/latest/download/cobalt-darwin-amd64.tar.gz) / [**M1, M2, M3**](https://github.com/princessmortix/cobalt/releases/latest/download/cobalt-darwin-arm64.tar.gz) |
+| Mac           | [Intel](https://github.com/princessmortix/cobalt/releases/latest/download/cobalt-darwin-amd64.tar.gz) / [**M1, M2, M3**](https://github.com/princessmortix/cobalt/releases/latest/download/cobalt-darwin-arm64.tar.gz) |
 
 You can also check the [releases page](https://github.com/princessmortix/cobalt/releases/latest) to download the latest version according to your platform.
+
+Alternatively, if you have Go installed, you can use `go install github.com/lostdusty/cobalt@latest` to install to your machine.
 
 ## Roadmap
 Planned features for cobalt-cli:
@@ -41,7 +43,7 @@ Planned features for cobalt-cli:
   - [ ] Time expiration for the returned url.
 - [ ] Option to save file to the current/custom folder, likely `-s` flag;
   - [ ] Display progress bar to track download progress (when supported by cobalt).
-- [ ] Hability to use custom downloader program (wget, curl, got, etc);
+  - [ ] Hability to use custom downloader program (wget, curl, got, etc);
 - [ ] Translations.
  
 
@@ -50,13 +52,21 @@ cobalt-cli has two subcommands:
 - download: downloads something using cobalt
 - instances: lists all known cobalt instances
 
+```
+Usage: cobalt <command>
+Commands:
+  download  - Use this command to download something.
+  instances - Use this command to view stats about other cobalt instances.
+Error: No command was provided. Please specify a command.
+```
+
 ### Download
 ```
 usage: cobalt download [-h|--help] [-u|--url "<value>"] [-c|--video-codec
               (av1|vp9|h264)] [-q|--video-quality
               (144|240|360|480|720|1080|1440|2160)] [-f|--audio-format
               (opus|ogg|wav|mp3|best)] [-p|--filename-pattern
-              (basic|pretty|nerdy|classic)] [-a|--no-video] [-V|--vimeo-dash]
+              (basic|pretty|nerdy|classic)] [-a|--no-video] [-T|--tiktok-h265]
               [-t|--full-tiktok-audio] [-v|--no-audio] [-d|--dubbed-audio]
               [-m|--metadata] [-g|--gif] [-j|--json] [-s|--status] [-i|--api
               "<value>"] [-l|--language "<value>"] [-b|--browser]
@@ -71,9 +81,10 @@ Arguments:
                            downloads. AV1: 8K/HDR, lower support | VP9: 4K/HDR,
                            best quality | H264: 1080p, works everywhere.
                            Default: h264
-  -q  --video-quality      Quality of the video. Default: 1080
-  -f  --audio-format       Audio format/codec to be used. Using the default the
-                           audio won't be re-encoded. Default: best
+  -q  --video-quality      Quality of the video, also applies only to youtube
+                           downloads. Default: 1080
+  -f  --audio-format       Audio format/codec to be used. "best" doesn't
+                           re-encodes the audio. Default: best
   -p  --filename-pattern   File name pattern. Classic:
                            youtube_yPYZpwSpKmA_1920x1080_h264.mp4 | audio:
                            youtube_yPYZpwSpKmA_audio.mp3 // Basic: Video Title
@@ -84,32 +95,32 @@ Arguments:
                            youtube, yPYZpwSpKmA).mp4 | audio: Audio Title -
                            Audio Author (soundcloud, 1242868615).mp3. Default:
                            pretty
-  -a  --no-video           Extract audio only. Default: false
-  -V  --vimeo-dash         Downloads Vimeo videos using dash instead of
-                           progressive. Default: false
-  -t  --full-tiktok-audio  Enables download of original sound used in a tiktok
-                           video. Default: false
+  -a  --no-video           Downloads only the audio, and removes the video.
+                           Default: false
+  -T  --tiktok-h265        Downloads TikTok videos using h265 codec. Default:
+                           false
+  -t  --full-tiktok-audio  Download the original sound used in a tiktok video.
+                           Default: false
   -v  --no-audio           Downloads only the video, without audio, when
                            possible. Default: false
   -d  --dubbed-audio       Downloads youtube audio dubbed, if present. Change
                            the language using -l <ISO 639-1 format>. Default:
                            false
   -m  --metadata           Disables file metadata. Default: false
-  -g  --gif                Disables conversion of twitter gifs to a .gif file.
-                           Default: true
-  -j  --json               Output to stdin as json. Default: false
-  -s  --status             Will only check status of the select cobalt server,
-                           print and exit. All other options will be ignored,
-                           except -j. Default: false
-  -i  --api                Change the cobalt api endpoint to be used. See
-                           others instances in https://instances.hyper.lol.
-                           Default: https://co.wuk.sh
+  -g  --gif                Convert twitter gifs to .gif. Default: true
+  -j  --json               Output to stdout as json
+  -s  --status             Check status of the selected cobalt server, prints
+                           and exits. All other options will be ignored, except
+                           -j | --json. Default: false
+  -i  --api                Change the cobalt api url used. See others instances
+                           in https://instances.hyper.lol. Default:
+                           https://api.cobalt.tools
   -l  --language           Downloads dubbed youtube audio according to the
                            language set following the ISO 639-1 format. Only
                            takes effect if -d was passed as an argument.
                            Default: en
-  -b  --browser            Opens the response link in default browser, if
-                           successful. Default: false
+  -b  --browser            Downloads the requested media in your browser.
+                           Default: false
 ```
 
 ### Instances
@@ -125,7 +136,7 @@ Arguments:
 ```
 
 ## JSON Output
-See the documentation for the json output of cobalt-cli.
+Documentation for the json output of cobalt-cli.
 ### Download
 All json output from the download subcommands follows this format:
 ```json
@@ -177,7 +188,7 @@ Check out too:
 
 
 # About & Thanks
-- [cobalt](https://github.com/wukko/cobalt) made by [wukko](https://github.com/wukko) && [jj](https://github.com/dumbmoron), super cool people;
+- [cobalt](https://github.com/imputnet/cobalt) made by [wukko](https://github.com/wukko) && [jj](https://github.com/dumbmoron), cool people;
 - [argparse](https://github.com/akamensky/argparse), for handling args;
 - Icon made by [me](https://lostdusty.com.br);
 - You, for using my application!

@@ -40,13 +40,13 @@ func main() {
 
 	optionVideoQuality := doDownload.Selector("q", "video-quality", []string{"144", "240", "360", "480", "720", "1080", "1440", "2160"}, &argparse.Options{
 		Required: false,
-		Help:     "Quality of the video",
+		Help:     "Quality of the video, also applies only to youtube downloads",
 		Default:  "1080",
 	})
 
 	optionAudioFormat := doDownload.Selector("f", "audio-format", []string{"opus", "ogg", "wav", "mp3", "best"}, &argparse.Options{
 		Required: false,
-		Help:     "Audio format/codec to be used. Using the default the audio won't be re-encoded",
+		Help:     "Audio format/codec to be used. \"best\" doesn't re-encodes the audio",
 		Default:  "best",
 	})
 
@@ -58,19 +58,19 @@ func main() {
 
 	optionAudioOnly := doDownload.Flag("a", "no-video", &argparse.Options{
 		Required: false,
-		Help:     "Extract audio only",
+		Help:     "Downloads only the audio, and removes the video",
 		Default:  false,
 	})
 
-	optionVimeoDash := doDownload.Flag("V", "vimeo-dash", &argparse.Options{
+	optionTikTokH265 := doDownload.Flag("T", "tiktok-h265", &argparse.Options{
 		Required: false,
-		Help:     "Downloads Vimeo videos using dash instead of progressive",
+		Help:     "Downloads TikTok videos using h265 codec",
 		Default:  false,
 	})
 
 	optionFullTikTokAudio := doDownload.Flag("t", "full-tiktok-audio", &argparse.Options{
 		Required: false,
-		Help:     "Enables download of original sound used in a tiktok video",
+		Help:     "Download the original sound used in a tiktok video",
 		Default:  false,
 	})
 
@@ -94,21 +94,28 @@ func main() {
 
 	optionConvertTwitterGif := doDownload.Flag("g", "gif", &argparse.Options{
 		Required: false,
-		Help:     "Disables conversion of twitter gifs to a .gif file",
+		Help:     "Convert twitter gifs to .gif",
 		Default:  true,
 	})
 
-	var outputJson, jsonOutput = doDownload.Flag("j", "json", &argparse.Options{Required: false, Help: "Output to stdout as json"}), getCobaltInstances.Flag("j", "json", &argparse.Options{Required: false, Help: "Output to stdout as json"})
+	var outputJson, jsonOutput = doDownload.Flag("j", "json", &argparse.Options{
+		Required: false,
+		Help:     "Output to stdout as json",
+	}),
+		getCobaltInstances.Flag("j", "json", &argparse.Options{
+			Required: false,
+			Help:     "Output to stdout as json",
+		})
 
 	commandStatus := doDownload.Flag("s", "status", &argparse.Options{
 		Required: false,
-		Help:     "Will only check status of the select cobalt server, print and exit. All other options will be ignored, except -j",
+		Help:     "Check status of the selected cobalt server, prints and exits. All other options will be ignored, except -j | --json",
 		Default:  false,
 	})
 
 	customCobaltApi := doDownload.String("i", "api", &argparse.Options{
 		Required: false,
-		Help:     "Change the cobalt api endpoint to be used. See others instances in https://instances.hyper.lol",
+		Help:     "Change the cobalt api url used. See others instances in https://instances.hyper.lol",
 		Default:  gobalt.CobaltApi,
 	})
 
@@ -120,22 +127,30 @@ func main() {
 
 	openInBrowser := doDownload.Flag("b", "browser", &argparse.Options{
 		Required: false,
-		Help:     "Opens the response link in default browser, if successful",
+		Help:     "Downloads the requested media in your browser",
 		Default:  false,
 	})
 
 	err := flagParser.Parse(os.Args)
 	if err != nil && errors.Is(err, flagParser.Parse(os.Args)) {
-		panic(fmt.Errorf("expected sub-command '%v' or '%v'", doDownload.GetName(), getCobaltInstances.GetName()))
+		fmt.Print(`[2;41m[0m[2;41m[0m[0;2mUsage: cobalt <command>
+Commands:
+  download  - Use this command to download something.
+  instances [0m- Use this command to view stats about other cobalt instances.
+[2;31mError: [1;31mNo command was provided. Please specify a command.[0m[2;31m[0m
+`)
+		return
 	}
 
 	if getCobaltInstances.Happened() {
 		err := getInstances(*jsonOutput)
 		if err != nil {
 			if *jsonOutput {
-				panic(errorJson(err))
+				fmt.Println(errorJson(err))
+				return
 			}
-			panic(err)
+			fmt.Println(err)
+			return
 		}
 		return
 	}
@@ -144,9 +159,11 @@ func main() {
 		err := checkStatus(*customCobaltApi, *outputJson)
 		if err != nil {
 			if *jsonOutput {
-				panic(errorJson(err))
+				fmt.Println(errorJson(err))
+				return
 			}
-			panic(err)
+			fmt.Println(err)
+			return
 		}
 		return
 	}
@@ -159,9 +176,11 @@ func main() {
 	validateLanguage := iso6391.ValidCode(strings.ToLower(*customLanguage))
 	if !validateLanguage {
 		if *outputJson {
-			panic(fmt.Errorf("invalid language code, check if the language code is following ISO 639-1 format"))
+			fmt.Println(fmt.Errorf("invalid language code, check if the language code is following ISO 639-1 format"))
+			return
 		}
-		panic("Invalid language code: " + *customLanguage)
+		fmt.Println("Invalid language code: " + *customLanguage)
+		return
 	}
 
 	newSettings := gobalt.CreateDefaultSettings()
@@ -208,24 +227,28 @@ func main() {
 	newSettings.DisableVideoMetadata = *optionDisableMetadata
 	newSettings.DubbedYoutubeAudio = *optionDubAudio
 	newSettings.FullTikTokAudio = *optionFullTikTokAudio
-	newSettings.UseVimeoDash = *optionVimeoDash
+	newSettings.TikTokH265 = *optionTikTokH265
 	newSettings.Url = *URL
 	newSettings.VideoOnly = *optionVideoOnly
 	quality, err := strconv.Atoi(*optionVideoQuality)
 	if err != nil {
 		if *outputJson {
-			panic(fmt.Errorf("expected int on flag -q, got something else: %s", *optionVideoQuality))
+			fmt.Println(fmt.Errorf("expected int on flag -q, got something else: %s", *optionVideoQuality))
+			return
 		}
-		panic(fmt.Errorf("expected int on flag -q, got something else: %s\nError details: %e", *optionVideoQuality, err))
+		fmt.Println(fmt.Errorf("expected int on flag -q, got something else: %s\nError details: %e", *optionVideoQuality, err))
+		return
 	}
 	newSettings.VideoQuality = quality
 
 	cobaltRequest, err := gobalt.Run(newSettings)
 	if err != nil {
 		if *outputJson {
-			panic(errorJson(err))
+			fmt.Println(errorJson(err))
+			return
 		}
-		panic(err)
+		fmt.Println(err)
+		return
 	}
 
 	if *outputJson {
@@ -257,7 +280,7 @@ func main() {
 		for _, urls := range cobaltRequest.URLs {
 			err := openInDefaultBrowser(urls)
 			if err != nil {
-				fmt.Println("Failed to open URL on default browser:", err)
+				fmt.Printf("Failed to open URL on default browser: %v\nWill print instead.", err)
 			}
 		}
 	}
@@ -335,9 +358,9 @@ func getInstances(args bool) error {
 
 	instancesTable := table.NewWriter()
 	instancesTable.SetOutputMirror(os.Stdout)
-	instancesTable.AppendHeader(table.Row{"name", "api url (frontend)", "api online (frontend)", "cors", "since", "version (branch, commit)"})
+	instancesTable.AppendHeader(table.Row{"name", "api url (frontend)", "API/Front online", "cors", "since", "version (branch, commit)"})
 	for _, v := range instances {
-		instancesTable.AppendRow(table.Row{v.Name, fmt.Sprintf("%v (front: %v)", v.URL, v.FrontendUrl), fmt.Sprintf("%v (front: %v)", v.ApiOnline, v.FrontEndOnline), v.Cors, utilHumanTime(v.StartTime), fmt.Sprintf("%v (%v, %v)", v.Version, v.Branch, v.Commit)})
+		instancesTable.AppendRow(table.Row{v.Name, fmt.Sprintf("%v (front: %v)", v.URL, v.FrontendUrl), fmt.Sprintf("%v", resolveApiFrontOnline(v.ApiOnline, v.FrontEndOnline)), resolveCors(v.Cors), utilHumanTime(v.StartTime), fmt.Sprintf("%v (%v, %v)", v.Version, v.Branch, v.Commit)})
 	}
 	instancesTable.SetStyle(table.StyleRounded)
 	instancesTable.Render()
@@ -348,4 +371,22 @@ func getInstances(args bool) error {
 func utilHumanTime(unixTime int64) string {
 	since := time.UnixMilli(unixTime)
 	return timediff.TimeDiff(since)
+}
+
+func resolveApiFrontOnline(api, front bool) string {
+	a, f := "no", "no"
+	if api {
+		a = "yes"
+	}
+	if front {
+		f = "yes"
+	}
+	return fmt.Sprintf("%s/%s", a, f)
+}
+
+func resolveCors(cors int) string {
+	if cors == 1 {
+		return "on"
+	}
+	return "off"
 }
