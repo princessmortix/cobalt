@@ -9,7 +9,7 @@
 ![GitHub License](https://img.shields.io/github/license/princessmortix/cobalt?style=for-the-badge&logo=unlicense)
 </div>
 
-Unofficial [cobalt](https://cobalt.tools) command line client made in go. cobalt-cli uses [gobalt library](https://github.com/princessmortix/gobalt) for communication between your machine <-> cobalt servers.
+Unofficial [cobalt](https://cobalt.tools) command line client made in go. cobalt-cli uses [gobalt library](https://github.com/lostdusty/gobalt) for communication between your machine <-> cobalt servers.
 
 - [Features](#features)
 - [Download](#downloading)
@@ -20,10 +20,9 @@ Unofficial [cobalt](https://cobalt.tools) command line client made in go. cobalt
 ## Features
 - Get directly link from the service cdn (if possible);
 - More than 15 services supported;
-- JSON output using the flag `-j` or `--json`;
 - Option to check status of cobalt servers;
 - Use custom cobalt instances (see https://instances.hyper.lol);
-- Get dubbed youtube audio.
+- Download the file directly to your computer.
 
 ## Download
 | **Platform/OS** | **Download link**  |
@@ -39,52 +38,45 @@ Alternatively, if you have Go installed, you can use `go install github.com/lost
 ## Roadmap
 Planned features for cobalt-cli:
 
-- [x] Json output;
-  - [ ] Time expiration for the returned url.
-- [ ] Option to save file to the current/custom folder, likely `-s` flag;
-  - [ ] Display progress bar to track download progress (when supported by cobalt).
+- [x] Option to save file to the current/custom folder, likely `-s` flag;
+  - [x] Display progress bar to track download progress (when supported by cobalt).
   - [ ] Hability to use custom downloader program (wget, curl, got, etc);
 - [ ] Translations.
  
 
 ## Usage
-cobalt-cli has two subcommands:
-- download: downloads something using cobalt
-- instances: lists all known cobalt instances
+cobalt-cli is similar to yt-dlp, just use `cobalt [url]`. If you use `cobalt help`, it will now show the help message.
 
-```
-Usage: cobalt <command>
-Commands:
-  download  - Use this command to download something.
-  instances - Use this command to view stats about other cobalt instances.
-Error: No command was provided. Please specify a command.
-```
+To save a file to the current directory, use the `-s` flag, like: `cobalt https://www.youtube.com/watch?v=n1a7o44WxNo -s`
 
-### Download
+### Help
 ```
-usage: cobalt download [-h|--help] [-u|--url "<value>"] [-c|--video-codec
-              (av1|vp9|h264)] [-q|--video-quality
-              (144|240|360|480|720|1080|1440|2160)] [-f|--audio-format
-              (opus|ogg|wav|mp3|best)] [-p|--filename-pattern
-              (basic|pretty|nerdy|classic)] [-a|--no-video] [-T|--tiktok-h265]
-              [-t|--full-tiktok-audio] [-v|--no-audio] [-d|--dubbed-audio]
-              [-m|--metadata] [-g|--gif] [-j|--json] [-s|--status] [-i|--api
-              "<value>"] [-l|--language "<value>"] [-b|--browser]
+usage: cobalt-cli [-h|--help] [url "<value>"] [-c|--video-codec (av1|vp9|h264)]
+                  [-q|--video-quality (144|240|360|480|720|1080|1440|2160)]
+                  [-f|--audio-format (opus|ogg|wav|mp3|best)]
+                  [-Q|--audio-quality (64|128|192|256|320)]
+                  [-p|--filename-pattern (basic|pretty|nerdy|classic)]
+                  [-m|--mode (auto|audio|mute)] [-x|--proxy]
+                  [-d|--disable-metadata] [-t|--tiktok-h265]
+                  [-T|--tiktok-full-audio] [-g|--gif] [-s|--save] [-a|--api
+                  "<value>"] [-i|--instances] [-v|--verbose]
 
-              download something using cobalt
+                  save what you want, directly from the terminal, no unwanted
+                  distractions involved. powered by cobalt's api
 
 Arguments:
 
   -h  --help               Print help information
-  -u  --url                The url to download using cobalt
+      <url>                url to save
   -c  --video-codec        Video codec to be used. Applies only to youtube
                            downloads. AV1: 8K/HDR, lower support | VP9: 4K/HDR,
                            best quality | H264: 1080p, works everywhere.
                            Default: h264
-  -q  --video-quality      Quality of the video, also applies only to youtube
+  -q  --video-quality      Quality of the video, applies only to youtube
                            downloads. Default: 1080
   -f  --audio-format       Audio format/codec to be used. "best" doesn't
-                           re-encodes the audio. Default: best
+                           re-encodes audio. Default: best
+  -Q  --audio-quality      Audio quality in kbps. Default: 320
   -p  --filename-pattern   File name pattern. Classic:
                            youtube_yPYZpwSpKmA_1920x1080_h264.mp4 | audio:
                            youtube_yPYZpwSpKmA_audio.mp3 // Basic: Video Title
@@ -95,76 +87,30 @@ Arguments:
                            youtube, yPYZpwSpKmA).mp4 | audio: Audio Title -
                            Audio Author (soundcloud, 1242868615).mp3. Default:
                            pretty
-  -a  --no-video           Downloads only the audio, and removes the video.
-                           Default: false
-  -T  --tiktok-h265        Downloads TikTok videos using h265 codec. Default:
+  -m  --mode               Mode to download the video. Auto: video with audio |
+                           Audio: only audio | Mute: video without audio.
+                           Default: auto
+  -x  --proxy              Tunnel the download through cobalt's servers,
+                           bypassing potential restrictions and protecting your
+                           identity and privacy. Default: false
+  -d  --disable-metadata   Disable metadata in the downloaded file. Default:
                            false
-  -t  --full-tiktok-audio  Download the original sound used in a tiktok video.
-                           Default: false
-  -v  --no-audio           Downloads only the video, without audio, when
-                           possible. Default: false
-  -d  --dubbed-audio       Downloads youtube audio dubbed, if present. Change
-                           the language using -l <ISO 639-1 format>. Default:
-                           false
-  -m  --metadata           Disables file metadata. Default: false
-  -g  --gif                Convert twitter gifs to .gif. Default: true
-  -j  --json               Output to stdout as json
-  -s  --status             Check status of the selected cobalt server, prints
-                           and exits. All other options will be ignored, except
-                           -j | --json. Default: false
-  -i  --api                Change the cobalt api url used. See others instances
-                           in https://instances.hyper.lol. Default:
-                           https://api.cobalt.tools
-  -l  --language           Downloads dubbed youtube audio according to the
-                           language set following the ISO 639-1 format. Only
-                           takes effect if -d was passed as an argument.
-                           Default: en
-  -b  --browser            Downloads the requested media in your browser.
-                           Default: false
+  -t  --tiktok-h265        Use H265 codec for TikTok downloads. Default: false
+  -T  --tiktok-full-audio  Download TikTok videos with the original sound used
+                           in a TikTok video. Default: false
+  -g  --gif                Convert Twitter videos to GIFs. Default: false
+  -s  --save               Save the downloaded file to disk. Default: true
+  -a  --api                Which API to use. Default is hyperdefined cobalt's
+                           API. If you are hosting a custom API, or want to use
+                           a different server, you can use it here. Default:
+                           https://cobalt-backend.canine.tools
+  -i  --instances          Show community instances and exit. Default: false
+  -v  --verbose            Enable verbose logging. Default: false
 ```
 
 ### Instances
-```
-usage: cobalt instances [-h|--help] [-j|--json]
+The command changed, now to view other instances, use `cobalt -i`
 
-              get the list of cobalt instances
-
-Arguments:
-
-  -h  --help  Print help information
-  -j  --json  Output to stdout as json
-```
-
-## JSON Output
-Documentation for the json output of cobalt-cli.
-### Download
-All json output from the download subcommands follows this format:
-```json
-{
-  "error": bool,
-  "message": "string",
-  "urls": ["string1", "string2", ...]
-}
-```
-Where:
-| **name** | **type** | **info** | **example** |
-|---|---|---|---|
-| error | bool | true if something went wrong | "error":true |
-| message | string | return error messages, otherwise "ok" | "message":"cobalt error: i couldn't connect to the service api. maybe it's down, or cobalt got blocked" |
-| urls | []string | array of urls returned by the service, query scaped | "urls":["https%3A%2F%2Fus3-co.wuk.sh%2Fapi%2Fstream%3Ft%3D6kS3Xr97CAoqvPlBYX0r8%26e%3D1713849463113%26h%3DNHPfrLZ-BJejEnH2orowNy0zzTlVXSYw77RBhzIf0MU%26s%3DxvmTt9DTNl4wLslkfYfCUv6UDIPOTv9iZutl7ENM_dc%26i%3DuX7INLhsbzzofNxZaw6o7g"] |
-
-### Instances
-Returns almost the original json from [https://instances.hyper.lol/](https://instances.hyper.lol/instances.json), except we add two extra keys: error and message, just like above.
-
-Example JSON:
-```json
-[{"error":false,"message":"success!"},[{"version":"7.12.6","commit":"50a98c8","branch":"current","name":"us3","url":"co.wuk.sh","cors":1,"startTime":"1713626380117","FrontendUrl":"cobalt.tools","ApiOnline":true,"FrontEndOnline":true},{"version":"7.12.6","commit":"50a98c8","branch":"current","name":"us-east","url":"cobalt.canine.tools","cors":1,"startTime":"1713837765475","FrontendUrl":"cobalt.canine.tools","ApiOnline":true,"FrontEndOnline":true},{"version":"7.12.6","commit":"50a98c8","branch":"current","name":"us-mw","url":"coapi.selfstacked.com","cors":1,"startTime":"1713626820678","FrontendUrl":"co.selfstacked.com","ApiOnline":true,"FrontEndOnline":true}]]
-```
-
-Error example:
-```json
-{"error":true,"message":"Get \"https://instances.hyper.lol/instances.json\": dial tcp: lookup instances.hyper.lol: no such host"}
-```
 
 ## Compiling
 Make sure you have the lastest go compiler. [Download it here](https://go.dev/dl).
