@@ -3,8 +3,12 @@ github.com/davecgh/go-spew v1.1.1 h1:vj9j/u1bqnvCEfJOwUhtlOARqs3+rkHYY13jYWTU97c
 github.com/davecgh/go-spew v1.1.1/go.mod h1:J7Y8YcW2NihsgmVo/mv3lAwl/skON4iLHjSsI+c5H38=
 github.com/jedib0t/go-pretty/v6 v6.6.0 h1:wmZVuAcEkZRT+Aq1xXpE8IGat4vE5WXOMmBpbQqERXw=
 github.com/jedib0t/go-pretty/v6 v6.6.0/go.mod h1:zbn98qrYlh95FIhwwsbIip0LYpwSG8SUOScs+v9/t0E=
+github.com/jedib0t/go-pretty/v6 v6.6.1 h1:iJ65Xjb680rHcikRj6DSIbzCex2huitmc7bDtxYVWyc=
+github.com/jedib0t/go-pretty/v6 v6.6.1/go.mod h1:zbn98qrYlh95FIhwwsbIip0LYpwSG8SUOScs+v9/t0E=
 github.com/lostdusty/gobalt/v2 v2.0.3 h1:jCV/VXyz6wbK0lLQRosDsuSR7bBUPjdGhTu9OJeC3N4=
 github.com/lostdusty/gobalt/v2 v2.0.3/go.mod h1:LiuOQrhZ81oUD8EtVIOXvdI0+iibamw0XYUeOhe8ibw=
+github.com/lostdusty/gobalt/v2 v2.0.4 h1:MkIPh4zuHUDo0qlqFPpxDtyK3NUEI2cIGmjlLmLXar8=
+github.com/lostdusty/gobalt/v2 v2.0.4/go.mod h1:LiuOQrhZ81oUD8EtVIOXvdI0+iibamw0XYUeOhe8ibw=
 github.com/mattn/go-runewidth v0.0.15 h1:UNAjwbU9l54TA3KzvqLGxwWjHmMgBUVhBiTjelZgg3U=
 github.com/mattn/go-runewidth v0.0.15/go.mod h1:Jdepj2loyihRzMpdS35Xk/zdY8IAYHsh153qUoGf23w=
 github.com/mattn/go-runewidth v0.0.16 h1:E5ScNMtiwvlvB5paMFdw9p4kSQzbXFikJ5SQO6TULQc=
