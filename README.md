@@ -42,6 +42,7 @@ Planned features for cobalt-cli:
   - [x] Display progress bar to track download progress (when supported by cobalt).
   - [ ] Hability to use custom downloader program (wget, curl, got, etc);
 - [ ] Translations.
+- [X] Benchmarking.
  
 
 ## Usage
@@ -59,7 +60,8 @@ usage: cobalt-cli [-h|--help] [url "<value>"] [-c|--video-codec (av1|vp9|h264)]
                   [-m|--mode (auto|audio|mute)] [-x|--proxy]
                   [-d|--disable-metadata] [-t|--tiktok-h265]
                   [-T|--tiktok-full-audio] [-g|--gif] [-s|--save] [-a|--api
-                  "<value>"] [-i|--instances] [-v|--verbose]
+                  "<value>"] [-i|--instances] [-v|--verbose] [-k|--key
+                  "<value>"] [-b|--benchmark]
 
                   save what you want, directly from the terminal, no unwanted
                   distractions involved. powered by cobalt's api
@@ -106,6 +108,11 @@ Arguments:
                            https://cobalt-backend.canine.tools
   -i  --instances          Show community instances and exit. Default: false
   -v  --verbose            Enable verbose logging. Default: false
+  -k  --key                API key by the instance owner. You may need to
+                           provide one to use download. Can be set with
+                           COBALT_API_KEY environment variable. Default:
+  -b  --benchmark          Run a benchmark to test the download speed and
+                           integrity. Default: false
 ```
 
 ### Instances

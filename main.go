@@ -1,6 +1,8 @@
 package main
 
 import (
+	"bytes"
+	"crypto/sha256"
 	"fmt"
 	"io"
 	"net/http"
@@ -9,6 +11,7 @@ import (
 	"runtime"
 	"strconv"
 	"strings"
+	"time"
 
 	"github.com/jedib0t/go-pretty/v6/table"
 	"github.com/lostdusty/gobalt/v2"
@@ -17,7 +20,7 @@ import (
 	"github.com/tgoncuoglu/argparse"
 )
 
-var version = "2.0.0-Alpha"
+var version = "2.0.1"
 var useragent = fmt.Sprintf("cobalt-cli/%v (+https://github.com/lostdusty/cobalt; go/%v; %v/%v)", version, runtime.Version(), runtime.GOOS, runtime.GOARCH)
 
 func main() {
@@ -116,6 +119,16 @@ func main() {
 		Help:     "Enable verbose logging",
 		Default:  false,
 	})
+	apiKey := cobaltParser.String("k", "key", &argparse.Options{
+		Required: false,
+		Help:     "API key by the instance owner. You may need to provide one to use download. Can be set with COBALT_API_KEY environment variable",
+		Default:  gobalt.ApiKey,
+	})
+	flagBenchmark := cobaltParser.Flag("b", "benchmark", &argparse.Options{
+		Required: false,
+		Help:     "Run a benchmark to test the download speed and integrity",
+		Default:  false,
+	})
 
 	err := cobaltParser.Parse(os.Args)
 	if err != nil {
@@ -144,9 +157,32 @@ func main() {
 		return
 	}
 
+	if *apiKey != "" {
+		log.Debug("API key was provided via flag, setting it to gobalt")
+		gobalt.ApiKey = *apiKey
+		log.Debugf("Key from flag: %v | Key from Gobalt: %v | Key from COBALT_API_KEY: %v", *apiKey, gobalt.ApiKey, os.Getenv("COBALT_API_KEY"))
+	}
+
+	gobalt.CobaltApi = *apiUrl
+
+	if *flagBenchmark {
+		log.Debug("Flag to run benchmark is set, running benchmark")
+		result, err := doBenchmark()
+		if err != nil {
+			log.Fatal(err)
+		}
+		mapBool := map[bool]string{true: "Yes!", false: "No :("}
+		benchmarkTable := table.NewWriter()
+		benchmarkTable.SetOutputMirror(os.Stdout)
+		benchmarkTable.AppendHeader(table.Row{"Instance", "Time to download", "Download speed (KB/s)", "File size (KB)", "File hash matches?"})
+		benchmarkTable.AppendRow(table.Row{result.Name, result.TimeToDownload, result.DownloadSpeed, result.FileSize, mapBool[result.HashMatches]})
+		benchmarkTable.SetStyle(table.StyleLight)
+		benchmarkTable.Render()
+		return
+	}
+
 	newDownload := gobalt.CreateDefaultSettings()
 	log.Debugf("Creating new cobalt download with default options: %v", newDownload)
-	gobalt.CobaltApi = *apiUrl
 	newDownload.Url = *urlToDownload
 	switch *youtubeVideoCodec {
 	case "av1":
@@ -260,6 +296,7 @@ func fetchContent(options gobalt.Settings, save bool) error {
 		)
 		io.Copy(io.MultiWriter(f, bar), responseDownload.Body)
 		f.Sync()
+		fmt.Println()
 		log.Info("File downloaded successfully!")
 	}
 
@@ -280,4 +317,69 @@ func communityInstances() {
 	}
 	instancesTable.SetStyle(table.StyleRounded)
 	instancesTable.Render()
+}
+
+type Benchmark struct {
+	Name           string        // Instance name
+	TimeToDownload time.Duration // Time to download the file
+	DownloadSpeed  int           // Download speed in KB/s
+	FileSize       int           // File size in KB
+	FileHash       string        // File hash in SHA256
+	HashMatches    bool          // If the hash matches the known good hash
+}
+
+func doBenchmark() (*Benchmark, error) {
+	//Know good hash: a092e6e57ff79077b5b3a6db97739cd925b462662bac82236f9de4227ac84757
+	cobaltBench := &Benchmark{
+		Name: gobalt.CobaltApi,
+	}
+
+	log.Info("Starting benchmark...")
+	downloadBenchmark := gobalt.CreateDefaultSettings()
+	downloadBenchmark.Url = "https://x.com/lostydust/status/1720929746987425821"
+	downloadBenchmark.Proxy = true
+	downloadBenchmark.VideoQuality = 1080
+
+	log.Debug("Running benchmark with the following options: ", downloadBenchmark)
+	log.Debugf("API: %s | Key: %s", gobalt.CobaltApi, gobalt.ApiKey)
+	grabUrl, err := gobalt.Run(downloadBenchmark)
+	if err != nil {
+		return nil, err
+	}
+	log.Debug("Ok, got tunnel url: ", grabUrl.URL)
+	requestDownload, err := http.NewRequest("GET", grabUrl.URL, nil)
+	requestDownload.Header.Set("User-Agent", useragent)
+	if err != nil {
+		return nil, err
+	}
+	fileBuffer := bytes.NewBuffer(nil)
+	log.Debug("Starting download now...")
+	start := time.Now()
+	responseDownload, err := gobalt.Client.Do(requestDownload)
+	if err != nil {
+		return nil, err
+	}
+	defer responseDownload.Body.Close()
+	if responseDownload.StatusCode != http.StatusOK {
+		err = fmt.Errorf("got http status %v while benchmarking the file", responseDownload.Status)
+		return nil, err
+	}
+	_, err = io.Copy(fileBuffer, responseDownload.Body)
+	if err != nil {
+		return nil, err
+	}
+
+	elapsed := time.Since(start)
+	log.Debug("Downloaded file in ", elapsed.Seconds(), " seconds")
+	hashfile := sha256.New()
+	hashfile.Write(fileBuffer.Bytes())
+	cobaltBench.TimeToDownload = elapsed
+	cobaltBench.FileSize = fileBuffer.Len() / 1024
+	cobaltBench.DownloadSpeed = int(float64(cobaltBench.FileSize) / elapsed.Seconds())
+	cobaltBench.FileHash = fmt.Sprintf("%x", hashfile.Sum(nil))
+	cobaltBench.HashMatches = cobaltBench.FileHash == "a092e6e57ff79077b5b3a6db97739cd925b462662bac82236f9de4227ac84757"
+	log.Debugf("File hash: %s", cobaltBench.FileHash)
+	log.Debugf("Hash matches? %v", cobaltBench.FileHash == "a092e6e57ff79077b5b3a6db97739cd925b462662bac82236f9de4227ac84757")
+	log.Info("[PASS] Benchmark finished!")
+	return cobaltBench, nil
 }
