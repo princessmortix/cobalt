@@ -46,9 +46,9 @@ Planned features for cobalt-cli:
  
 
 ## Usage
-cobalt-cli is similar to yt-dlp, just use `cobalt [url]`. If you use `cobalt help`, it will now show the help message.
+cobalt-cli is similar to yt-dlp, just use `cobalt [url]`. If you use `cobalt help`, it will just show the help message.
 
-To save a file to the current directory, use the `-s` flag, like: `cobalt https://www.youtube.com/watch?v=n1a7o44WxNo -s`
+By default cobalt-cli saves the request link to the current directory, use the `-s` flag to change to another directory, like: `cobalt https://www.youtube.com/watch?v=n1a7o44WxNo -s ..\Videos`
 
 ### Help
 ```
@@ -59,9 +59,9 @@ usage: cobalt-cli [-h|--help] [url "<value>"] [-c|--video-codec (av1|vp9|h264)]
                   [-p|--filename-pattern (basic|pretty|nerdy|classic)]
                   [-m|--mode (auto|audio|mute)] [-x|--proxy]
                   [-d|--disable-metadata] [-t|--tiktok-h265]
-                  [-T|--tiktok-full-audio] [-g|--gif] [-s|--save] [-a|--api
-                  "<value>"] [-i|--instances] [-v|--verbose] [-k|--key
-                  "<value>"] [-b|--benchmark]
+                  [-T|--tiktok-full-audio] [-g|--gif] [-s|--save "<value>"]
+                  [-a|--api "<value>"] [-i|--instances] [-v|--verbose]
+                  [-k|--key "<value>"] [-b|--benchmark] [-P|--print]
 
                   save what you want, directly from the terminal, no unwanted
                   distractions involved. powered by cobalt's api
@@ -101,7 +101,9 @@ Arguments:
   -T  --tiktok-full-audio  Download TikTok videos with the original sound used
                            in a TikTok video. Default: false
   -g  --gif                Convert Twitter videos to GIFs. Default: false
-  -s  --save               Save the downloaded file to disk. Default: true
+  -s  --save               What folder to save the file to. If not provided,
+                           will use the current directory. Default:
+                           D:\Docs\GitHub\cobalt
   -a  --api                Which API to use. Default is hyperdefined cobalt's
                            API. If you are hosting a custom API, or want to use
                            a different server, you can use it here. Default:
@@ -110,9 +112,12 @@ Arguments:
   -v  --verbose            Enable verbose logging. Default: false
   -k  --key                API key by the instance owner. You may need to
                            provide one to use download. Can be set with
-                           COBALT_API_KEY environment variable. Default:
+                           COBALT_API_KEY environment variable. If not
+                           provided, will load from keychain. Default:
   -b  --benchmark          Run a benchmark to test the download speed and
                            integrity. Default: false
+  -P  --print              Print the download link only, do not download the
+                           file. Default: false
 ```
 
 ### Instances
@@ -138,6 +143,8 @@ After that, building with `go build` will automatically embed these files on the
 Check out too:
 - [tobalt, cobalt in typescript](https://github.com/tskau/tobalt)
 - [tcobalt, cobalt cli in rust](https://github.com/khyerdev/tcobalt)
+- [pybalt, cobalt cli & api in python](https://github.com/nichind/pybalt)
+- [gobalt(2), another lib for cobalt in go](https://github.com/andresperezl/gobalt)
 
 
 # About & Thanks

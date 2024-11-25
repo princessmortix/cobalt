@@ -20,8 +20,15 @@ import (
 	"github.com/tgoncuoglu/argparse"
 )
 
-var version = "2.0.1"
+var version = "1.1.2"
 var useragent = fmt.Sprintf("cobalt-cli/%v (+https://github.com/lostdusty/cobalt; go/%v; %v/%v)", version, runtime.Version(), runtime.GOOS, runtime.GOARCH)
+
+func init() {
+	log.SetFormatter(&log.TextFormatter{
+		ForceColors:   true,
+		FullTimestamp: true,
+	})
+}
 
 func main() {
 	cobaltParser := argparse.NewParser("cobalt-cli", "save what you want, directly from the terminal, no unwanted distractions involved. powered by cobalt's api")
@@ -43,7 +50,10 @@ func main() {
 		},
 		Help: "url to save",
 	})
-
+	pwd, err := os.Getwd()
+	if err != nil {
+		pwd = "."
+	}
 	youtubeVideoCodec := cobaltParser.Selector("c", "video-codec", []string{"av1", "vp9", "h264"}, &argparse.Options{
 		Required: false,
 		Help:     "Video codec to be used. Applies only to youtube downloads. AV1: 8K/HDR, lower support | VP9: 4K/HDR, best quality | H264: 1080p, works everywhere",
@@ -99,10 +109,10 @@ func main() {
 		Help:     "Convert Twitter videos to GIFs",
 		Default:  false,
 	})
-	saveToDisk := cobaltParser.Flag("s", "save", &argparse.Options{
+	saveToDisk := cobaltParser.String("s", "save", &argparse.Options{
 		Required: false,
-		Help:     "Save the downloaded file to disk",
-		Default:  true,
+		Help:     "What folder to save the file to. If not provided, will use the current directory",
+		Default:  pwd,
 	})
 	apiUrl := cobaltParser.String("a", "api", &argparse.Options{
 		Required: false,
@@ -121,7 +131,7 @@ func main() {
 	})
 	apiKey := cobaltParser.String("k", "key", &argparse.Options{
 		Required: false,
-		Help:     "API key by the instance owner. You may need to provide one to use download. Can be set with COBALT_API_KEY environment variable",
+		Help:     "API key by the instance owner. You may need to provide one to use download. Can be set with COBALT_API_KEY environment variable. If not provided, will load from keychain",
 		Default:  gobalt.ApiKey,
 	})
 	flagBenchmark := cobaltParser.Flag("b", "benchmark", &argparse.Options{
@@ -129,17 +139,17 @@ func main() {
 		Help:     "Run a benchmark to test the download speed and integrity",
 		Default:  false,
 	})
+	printOnly := cobaltParser.Flag("P", "print", &argparse.Options{
+		Required: false,
+		Help:     "Print the download link only, do not download the file",
+		Default:  false,
+	})
 
-	err := cobaltParser.Parse(os.Args)
+	err = cobaltParser.Parse(os.Args)
 	if err != nil {
-		fmt.Println(err)
+		fmt.Println(cobaltParser.Usage(err))
 		return
 	}
-
-	log.SetFormatter(&log.TextFormatter{
-		ForceColors:   true,
-		FullTimestamp: true,
-	})
 
 	if *debugVerbose {
 		log.SetLevel(log.DebugLevel)
@@ -161,6 +171,7 @@ func main() {
 		log.Debug("API key was provided via flag, setting it to gobalt")
 		gobalt.ApiKey = *apiKey
 		log.Debugf("Key from flag: %v | Key from Gobalt: %v | Key from COBALT_API_KEY: %v", *apiKey, gobalt.ApiKey, os.Getenv("COBALT_API_KEY"))
+
 	}
 
 	gobalt.CobaltApi = *apiUrl
@@ -239,66 +250,95 @@ func main() {
 	newDownload.TwitterConvertGif = *convertTwitterGif
 	log.Debugf("Options changed to: %v", newDownload)
 
-	err = fetchContent(newDownload, *saveToDisk)
+	//Check if the url is a playlist
+	if strings.Contains(*urlToDownload, "playlist") {
+		log.Debug("URL is a playlist, fetching playlist")
+		playlist, err := gobalt.GetYoutubePlaylist(*urlToDownload)
+		if err != nil {
+			log.Warnf("Error fetching playlist: %v, will try to fetch as a singular url...", err)
+			err = fetchContent(newDownload, *saveToDisk, *printOnly)
+			if err != nil {
+				log.Fatal(err)
+				return
+			}
+		}
+		log.Debugf("Playlist size: %v", len(playlist))
+
+		//Make an array of gobalt.Settings to download each video in the playlist
+		for n, video := range playlist {
+			newDownload.Url = video
+			err = fetchContent(newDownload, *saveToDisk, *printOnly)
+			if err != nil {
+				log.Errorln("\n", err)
+			}
+			log.Infof("\r\r%v of %v downloaded (%v%%)", n+1, len(playlist), (n+1)*100/len(playlist))
+			time.Sleep(400 * time.Millisecond)
+		}
+		fmt.Println()
+		log.Info("Playlist finished downloading!")
+	}
+
+	err = fetchContent(newDownload, *saveToDisk, *printOnly)
 	if err != nil {
 		log.Fatal(err)
 		return
 	}
+	log.Info("Download finished!")
 }
 
-func fetchContent(options gobalt.Settings, save bool) error {
-	log.Debug("Fetching content now, save to disk: ", save)
-	log.Info("Sending request to cobalt server...")
+func fetchContent(options gobalt.Settings, save string, print bool) error {
+	log.Debug("Fetching content now, folder to save: ", save)
 	media, err := gobalt.Run(options)
 	if err != nil {
 		return err
 	}
 	log.Debug("Cobalt replied our request with the following url: ", media.URL)
-	fmt.Println(media.URL)
-	if save {
-		log.Info("Downloading the file to disk...")
-
-		requestDownload, err := http.NewRequest("GET", media.URL, nil)
-		requestDownload.Header.Set("User-Agent", useragent)
-		log.Debug("Creating new request to download the file\nUser-Agent: ", useragent)
-		if err != nil {
-			return err
-		}
-
-		responseDownload, err := gobalt.Client.Do(requestDownload)
-		log.Debug("Sending request to download the file using gobalt client")
-		if err != nil {
-			return err
-		}
-		defer responseDownload.Body.Close()
-
-		log.Debug("Request ok, status code: ", responseDownload.StatusCode)
-
-		isResponseHTML := strings.Contains(responseDownload.Header.Get("Content-Type"), "text/html")
-		if responseDownload.StatusCode != http.StatusOK || isResponseHTML {
-			if isResponseHTML {
-				return fmt.Errorf("we got blocked trying to download the file, contact the instance owner if you think this is a mistake\nDetails: response is HTML (%s)", responseDownload.Header.Get("Content-Type"))
-			}
-			readBody, _ := io.ReadAll(responseDownload.Body)
-			log.Debugf("got status %v while download the file.\nBody:\n%v", responseDownload.Status, string(readBody))
-			return fmt.Errorf("error downloading the file: %s", responseDownload.Status)
-		}
-
-		f, err := os.OpenFile(media.Filename, os.O_CREATE|os.O_WRONLY, 0644)
-		if err != nil {
-			return err
-		}
-		defer f.Close()
-
-		bar := progressbar.DefaultBytes(
-			responseDownload.ContentLength,
-			"downloading "+media.Filename,
-		)
-		io.Copy(io.MultiWriter(f, bar), responseDownload.Body)
-		f.Sync()
-		fmt.Println()
-		log.Info("File downloaded successfully!")
+	if print {
+		fmt.Println(media.URL)
+		return nil
 	}
+
+	requestDownload, err := http.NewRequest("GET", media.URL, nil)
+	requestDownload.Header.Set("User-Agent", useragent)
+	log.Debug("Creating new request to download the file\nUser-Agent: ", useragent)
+	if err != nil {
+		return err
+	}
+
+	responseDownload, err := gobalt.Client.Do(requestDownload)
+	log.Debug("Sending request to download the file using gobalt client")
+	if err != nil {
+		return err
+	}
+	defer responseDownload.Body.Close()
+
+	log.Debug("Request ok, status code: ", responseDownload.StatusCode)
+
+	isResponseHTML := strings.Contains(responseDownload.Header.Get("Content-Type"), "text/html")
+	if responseDownload.StatusCode != http.StatusOK || isResponseHTML {
+		if isResponseHTML {
+			return fmt.Errorf("we got blocked trying to download the file, contact the instance owner if you think this is a mistake\nDetails: response is HTML (%s)", responseDownload.Header.Get("Content-Type"))
+		}
+		readBody, _ := io.ReadAll(responseDownload.Body)
+		log.Debugf("got status %v while download the file.\nBody:\n%v", responseDownload.Status, string(readBody))
+		return fmt.Errorf("error downloading the file: %s", responseDownload.Status)
+	}
+
+	f, err := os.OpenFile(save+"\\"+media.Filename, os.O_CREATE|os.O_WRONLY, 0644)
+	if err != nil {
+		return err
+	}
+	log.Debug("Saving file to disk: ", f.Name())
+
+	defer f.Close()
+
+	bar := progressbar.DefaultBytes(
+		responseDownload.ContentLength,
+		"downloading "+media.Filename,
+	)
+	io.Copy(io.MultiWriter(f, bar), responseDownload.Body)
+	f.Sync()
+	fmt.Println()
 
 	return nil
 }
@@ -311,9 +351,9 @@ func communityInstances() {
 	}
 	instancesTable := table.NewWriter()
 	instancesTable.SetOutputMirror(os.Stdout)
-	instancesTable.AppendHeader(table.Row{"API", "Score", "Trust", "Version (commit)", "Turnstile"})
+	instancesTable.AppendHeader(table.Row{"API", "Score", "Trust", "Version (commit)"})
 	for _, instance := range instances {
-		instancesTable.AppendRow(table.Row{instance.API, fmt.Sprintf("%.0f%%", instance.Score), instance.Trust, fmt.Sprintf("%v (%v)", instance.Version, instance.Commit), instance.Turnstile})
+		instancesTable.AppendRow(table.Row{instance.API, fmt.Sprintf("%v%%", instance.Score), instance.Trust, fmt.Sprintf("%v (%v)", instance.Version, instance.Commit)})
 	}
 	instancesTable.SetStyle(table.StyleRounded)
 	instancesTable.Render()

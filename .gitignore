@@ -26,3 +26,10 @@ go.work
 
 # Win-get manifests
 manifests/
+
+# media files
+*.opus
+*.mp3
+*.mp4
+*.webm
+*.wav
